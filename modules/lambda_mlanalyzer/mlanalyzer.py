@@ -1,58 +1,43 @@
-import boto3
 import json
+import boto3
 
-lambda_client = boto3.client('lambda')
-textract = boto3.client('textract')
-
-def call_sagemaker_stub(text_lines):
-    print("🧠 [SageMaker Stub] Simulating analysis...")
-    # Pretend we ran an ML model and got this result
-    return {
-        "insights": {
-            "sentiment": "positive",
-            "confidence": 0.97,
-            "topics": ["aws", "automation"]
-        }
-    }
+sagemaker = boto3.client('sagemaker-runtime')
 
 def lambda_handler(event, context):
-    print("📬 MLAnalyzer triggered by SNS")
+    print("Event:", event)
 
-    sns_record = event['Records'][0]['Sns']
-    message = json.loads(sns_record['Message'])
+    extracted_text = event.get("text", "")
 
-    job_id = message.get("JobId")
-    print(f"🔍 Fetching Textract results for JobId: {job_id}")
+    if not extracted_text:
+        return {
+            "statusCode": 400,
+            "body": json.dumps("No text provided.")
+        }
 
-    response = textract.get_document_text_detection(JobId=job_id)
-    blocks = response.get("Blocks", [])
-    text_lines = [block["Text"] for block in blocks if block["BlockType"] == "LINE"]
+    try:
+        # Prepare the payload as a JSON string with 'inputs' key
+        payload = json.dumps({"inputs": extracted_text})
 
-    print(f"📝 Extracted {len(text_lines)} lines:")
-    for line in text_lines:
-        print("•", line)
+        response = sagemaker.invoke_endpoint(
+            EndpointName="jumpstart-dft-hf-tc-distilbert-base-20250510-164655",
+            ContentType="application/json",  # Set the correct content type
+            Body=payload
+        )
 
-    # Simulate SageMaker
-    insights = call_sagemaker_stub(text_lines)
-    print("📊 SageMaker Insights:", json.dumps(insights))
+        result = json.loads(response['Body'].read().decode())
 
-    payload = {
-    "lines": text_lines,
-    "insights": insights["insights"]
-    }
+        print("SageMaker response:", json.dumps(result, indent=2))
 
-    response = lambda_client.invoke(
-    FunctionName="SaveAndIndex",
-    InvocationType="Event",
-    Payload=json.dumps({ "body": json.dumps(payload) })
-    )
+        return {
+            "statusCode": 200,
+            "body": json.dumps({
+                "classification": result
+            })
+        }
 
-    print("📬 Invoked SaveAndIndex Lambda:", response['StatusCode'])
-
-    return {
-    'statusCode': 200,
-    'body': json.dumps({
-        'linesExtracted': len(text_lines),
-        'insights': insights
-    })
-    }
+    except Exception as e:
+        print("SageMaker invocation failed:", str(e))
+        return {
+            "statusCode": 500,
+            "body": json.dumps("Error invoking SageMaker")
+        }

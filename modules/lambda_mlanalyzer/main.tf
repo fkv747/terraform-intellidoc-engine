@@ -63,3 +63,19 @@ resource "aws_iam_role_policy" "invoke_save_and_index" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "mlanalyzer_sagemaker_access" {
+  name = "AllowInvokeSageMaker"
+  role = aws_iam_role.lambda_role.name  # ✅ Correct reference to your actual role
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = "sagemaker:InvokeEndpoint",
+        Resource = "*"  # You can restrict this later if needed
+      }
+    ]
+  })
+}
