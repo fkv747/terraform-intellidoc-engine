@@ -8,36 +8,39 @@
   </head>
   <body>
     <div class="container">
-      <div class="card">
-        <div class="header-column">
-          <img src="dna.gif" alt="DNA icon" class="dna-inline" />
-          <h1 class="headline">HealthDoc Search Engine</h1>
-        </div>
-
-        <!-- Search Section -->
-        <div class="card-box">
-          <div class="section">
-            <h2>Search Extracted Insights</h2>
-            <div class="search-group">
-              <input type="text" id="searchInput" placeholder="Search medical terms..." />
+      <div class="header-row">
+        <h1 class="headline">HealthDoc Search Engine</h1>
+        <img src="dna.gif" alt="DNA animation" class="dna-inline" />
+      </div>      
+    
+      <div class="card horizontal">
+        <!-- LEFT: Search Card -->
+        <div class="card-box" style="flex: 1; margin-right: 1rem;">
+          <h2>Search Extracted Insights</h2>
+          <div class="search-section">
+            <input type="text" class="search-input" placeholder="Search medical terms..." />
+            <div style="margin-top: 1rem;">
               <button class="search-btn">Search</button>
             </div>
-            <div id="searchResults"></div>
-          </div>
+          </div>          
         </div>
-
-        <!-- Upload Section -->
-        <div class="card-box">
-          <form id="uploadForm" class="section">
-            <h2>Upload Medical Document</h2>
-            <input type="file" id="fileInput" accept=".pdf,.txt,.docx,.jpg,.png" />
-            <label for="fileInput" class="upload-btn">Choose File</label>
+    
+        <!-- RIGHT: Upload Card -->
+        <div class="card-box" style="flex: 1; margin-left: 1rem;">
+          <h2>Upload Medical Document</h2>
+          <form id="upload-form">
+            <label class="upload-btn">
+              Choose File
+              <input type="file" id="file-input" accept=".pdf,.docx,.xlsx,.txt" required />
+            </label>
             <span id="fileName">No file selected</span>
             <button type="submit" class="submit-btn">Upload</button>
           </form>
+          <p id="upload-status"></p>
         </div>
       </div>
     </div>
+    
 
     <script src="script.js"></script>
   </body>

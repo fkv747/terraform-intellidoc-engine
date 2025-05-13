@@ -76,12 +76,29 @@ input[type="file"] {
   margin-bottom: 0.5rem;
 }
 
+#upload-form {
+  margin-top: 20px;
+}
+
+#upload-form input,
+#upload-form button {
+  padding: 10px;
+  font-size: 1rem;
+  margin: 5px;
+}
+
+#upload-status {
+  margin-top: 15px;
+  color: green;
+  font-weight: bold;
+}
+
 #fileName {
   display: block;
   font-size: 0.9rem;
   color: #666;
-  margin-bottom: 1rem;
-  text-align: left;
+  margin: 0.5rem 0 1rem 0;
+  text-align: center;
 }
 
 .submit-btn,
@@ -108,6 +125,22 @@ input[type="file"] {
 
 .search-btn:hover {
   background-color: #4746b1;
+}
+
+.search-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.search-input {
+  width: 80%;
+  max-width: 300px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  font-size: 1rem;
+  outline: none;
 }
 
 .divider {
@@ -137,7 +170,7 @@ input[type="text"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: .5rem;
   margin-bottom: 2rem;
 }
 
@@ -174,4 +207,14 @@ input[type="text"] {
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.06);
   padding: 2rem;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .card.horizontal {
+    flex-direction: column;
+  }
+
+  .card-box {
+    margin: 0 !important;
+  }
 }
