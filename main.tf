@@ -102,7 +102,7 @@ module "api_gateway" {
 
 module "lambda_search_opensearch" {
   source                = "./modules/lambda_search_opensearch"
-  opensearch_url        = "https://your-opensearch-domain.us-east-1.es.amazonaws.com"
+  opensearch_url        = "https://search-intellidoc-engine-2cefx5uy2eedt6kxs23a5f2cs4.us-east-1.es.amazonaws.com"
   opensearch_index      = "documents"
   opensearch_domain_arn = "arn:aws:es:us-east-1:123456789012:domain/your-opensearch-name"
   aws_region            = "us-east-1"

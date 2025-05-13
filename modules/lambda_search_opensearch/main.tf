@@ -34,31 +34,21 @@ resource "aws_iam_role_policy_attachment" "attach_policy" {
   policy_arn = aws_iam_policy.opensearch_policy.arn
 }
 
-resource "null_resource" "zip_lambda" {
-  provisioner "local-exec" {
-    command = "cd ${path.module} && zip lambda_payload.zip main.py"
-  }
-
-  triggers = {
-    always_run = timestamp()
-  }
-}
-
 resource "aws_lambda_function" "search_opensearch" {
   function_name = "SearchOpenSearch"
   role          = aws_iam_role.lambda_role.arn
   runtime       = "python3.12"
-  handler       = "main.lambda_handler"
-  filename      = "${path.module}/lambda_payload.zip"
+  handler       = "search_opensearch.lambda_handler"
+
+  filename         = "${path.module}/lambda_payload.zip"
   source_code_hash = filebase64sha256("${path.module}/lambda_payload.zip")
 
   environment {
     variables = {
       OPENSEARCH_URL   = var.opensearch_url
       OPENSEARCH_INDEX = var.opensearch_index
-      AWS_REGION       = var.aws_region
+      REGION           = var.aws_region
     }
   }
-
-  depends_on = [null_resource.zip_lambda]
 }
+

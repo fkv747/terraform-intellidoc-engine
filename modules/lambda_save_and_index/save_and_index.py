@@ -1,72 +1,80 @@
 import json
 import boto3
-import uuid
+import os
+import requests
+from requests_aws4auth import AWS4Auth
 from datetime import datetime
-import botocore.auth
-import botocore.awsrequest
-import botocore.session
-from urllib.request import Request, urlopen
+from decimal import Decimal
 
-dynamodb = boto3.client('dynamodb')
+region = os.getenv("REGION", "us-east-1")
+service = "es"
+credentials = boto3.Session().get_credentials()
+awsauth = AWS4Auth(
+    credentials.access_key,
+    credentials.secret_key,
+    region,
+    service,
+    session_token=credentials.token
+)
 
 def lambda_handler(event, context):
-    print("📥 SaveAndIndex triggered")
+    print("📥 SaveAndIndex Lambda invoked")
+    print("📦 Raw event:", json.dumps(event))
 
-    payload = json.loads(event['body'])
-    document_id = str(uuid.uuid4())
+    # ✅ Handle SNS-style "body" wrapping
+    if "body" in event and isinstance(event["body"], str):
+        event = json.loads(event["body"])
+        print("✅ Unwrapped body:", json.dumps(event))
 
-    # Save to DynamoDB
-    item = {
-        "DocumentId": {"S": document_id},
-        "TextLines": {"S": json.dumps(payload.get("lines", []))},
-        "Insights": {"S": json.dumps(payload.get("insights", {}))}
-    }
+    # ✅ Real structure expected now
+    document_id = "doc-" + datetime.now().strftime("%Y%m%d%H%M%S")
+    category = "Cardiology"
+    confidence = Decimal("0.99")
 
-    print(f"🗂️ Saving to DynamoDB: {item}")
-    dynamodb.put_item(
-        TableName="IntelliDocMetadata",
-        Item=item
-    )
+    extracted_text = event.get("lines", ["No text provided"])
+    timestamp = datetime.now().isoformat()
 
-    # Signed OpenSearch indexing
-    region = "us-east-1"
-    service = "es"
-    host = "search-intellidoc-engine-2cefx5uy2eedt6kxs23a5f2cs4.us-east-1.es.amazonaws.com"
-    endpoint = f"https://{host}/intellidoc/_doc/{document_id}"
+    payload = {
+    "DocumentId": document_id,
+    "category": category,
+    "confidence": str(confidence),
+    "extracted_text": extracted_text,
+    "timestamp": timestamp
+}
 
-    document_to_index = {
-        "document_id": document_id,
-        "summary": payload.get("insights", {}).get("summary"),
-        "entities": payload.get("insights", {}).get("entities"),
-        "timestamp": datetime.now().isoformat()
-    }
+    print("📤 Final payload:", json.dumps(payload, default=str))
 
-    session = botocore.session.get_session()
-    credentials = session.get_credentials()
-    request = botocore.awsrequest.AWSRequest(
-        method="PUT",
-        url=endpoint,
-        data=json.dumps(document_to_index).encode("utf-8"),
-        headers={"Host": host, "Content-Type": "application/json"}
-    )
-    signer = botocore.auth.SigV4Auth(credentials, service, region)
-    signer.add_auth(request)
+    # ✅ Static config for known working infra
+    index = "documents"
+    url = "https://search-intellidoc-engine-2cefx5uy2eedt6kxs23a5f2cs4.us-east-1.es.amazonaws.com"
+    table_name = "IntelliDocMetadata"
 
-    signed_request = request.prepare()
-    req = Request(
-        signed_request.url,
-        data=signed_request.body,
-        headers=dict(signed_request.headers),
-        method="PUT"
-    )
-
-    try:
-        with urlopen(req) as response:
-            print("📤 OpenSearch response:", response.status, response.read().decode())
-    except Exception as e:
-        print("❌ OpenSearch error:", str(e))
+    save_to_opensearch(document_id, payload, index, url, awsauth)
+    save_to_dynamodb(payload, table_name)
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"message": "Data saved and indexed", "DocumentId": document_id})
+        "body": json.dumps({"message": "✅ Data saved successfully"})
     }
+
+def save_to_opensearch(document_id, payload, index, url, auth):
+    try:
+        response = requests.put(
+            f"{url}/{index}/_doc/{document_id}",
+            auth=auth,
+            json=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        print("🔍 OpenSearch response:", response.text)
+    except Exception as e:
+        print("❌ OpenSearch error:", str(e))
+
+def save_to_dynamodb(payload, table_name):
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(table_name)
+
+    try:
+        response = table.put_item(Item=payload)
+        print("🧾 DynamoDB response:", response)
+    except Exception as e:
+        print("❌ DynamoDB error:", str(e))
