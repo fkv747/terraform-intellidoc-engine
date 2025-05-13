@@ -6,6 +6,19 @@ resource "aws_s3_bucket" "this" {
   tags = var.tags
 }
 
+resource "aws_s3_bucket_cors_configuration" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "POST", "GET"]
+    allowed_origins = ["*"]
+    expose_headers  = []
+    max_age_seconds = 3000
+  }
+}
+
+
 resource "aws_s3_bucket_versioning" "this" {
   bucket = aws_s3_bucket.this.id
 

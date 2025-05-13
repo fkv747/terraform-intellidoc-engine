@@ -88,3 +88,22 @@ module "opensearch" {
   source      = "./modules/opensearch"
   domain_name = "intellidoc-engine"
 }
+
+module "lambda_presign_upload" {
+  source        = "./modules/lambda_presign_upload"
+  upload_bucket = "intellidoc-input-bucket"
+}
+
+module "api_gateway" {
+  source       = "./modules/api-gateway"
+  lambda_arn   = module.lambda_presign_upload.lambda_presign_arn
+  lambda_name  = "PresignUpload"
+}
+
+module "lambda_search_opensearch" {
+  source                = "./modules/lambda_search_opensearch"
+  opensearch_url        = "https://your-opensearch-domain.us-east-1.es.amazonaws.com"
+  opensearch_index      = "documents"
+  opensearch_domain_arn = "arn:aws:es:us-east-1:123456789012:domain/your-opensearch-name"
+  aws_region            = "us-east-1"
+}

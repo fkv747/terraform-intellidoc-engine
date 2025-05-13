@@ -1,43 +1,70 @@
-import json
 import boto3
+import json
 
-sagemaker = boto3.client('sagemaker-runtime')
+lambda_client = boto3.client('lambda')
+textract = boto3.client('textract')
+
+def call_sagemaker_model(text):
+    runtime = boto3.client("sagemaker-runtime")
+    response = runtime.invoke_endpoint(
+        EndpointName="hf-tc-distilbert-base-uncased-2025-05-12-06-40-41-983",
+        ContentType="application/x-text",
+        Body=text.encode("utf-8")
+    )
+
+    result = json.loads(response["Body"].read().decode())
+    probs = result["probabilities"]
+
+    topics = ["aws", "automation"]  # Or anything you want to tag
+    confidence = max(probs)
+    sentiment = "positive" if confidence >= 0.5 else "negative"
+
+    return {
+        "insights": {
+            "sentiment": sentiment,
+            "confidence": round(confidence, 2),
+            "topics": topics
+        }
+    }
 
 def lambda_handler(event, context):
-    print("Event:", event)
+    print("📬 MLAnalyzer triggered by SNS")
 
-    extracted_text = event.get("text", "")
+    sns_record = event['Records'][0]['Sns']
+    message = json.loads(sns_record['Message'])
 
-    if not extracted_text:
-        return {
-            "statusCode": 400,
-            "body": json.dumps("No text provided.")
-        }
+    job_id = message.get("JobId")
+    print(f"🔍 Fetching Textract results for JobId: {job_id}")
 
-    try:
-        # Prepare the payload as a JSON string with 'inputs' key
-        payload = json.dumps({"inputs": extracted_text})
+    response = textract.get_document_text_detection(JobId=job_id)
+    blocks = response.get("Blocks", [])
+    text_lines = [block["Text"] for block in blocks if block["BlockType"] == "LINE"]
 
-        response = sagemaker.invoke_endpoint(
-            EndpointName="jumpstart-dft-hf-tc-distilbert-base-20250510-164655",
-            ContentType="application/json",  # Set the correct content type
-            Body=payload
-        )
+    print(f"📝 Extracted {len(text_lines)} lines:")
+    for line in text_lines:
+        print("•", line)
 
-        result = json.loads(response['Body'].read().decode())
+    joined_text = " ".join(text_lines)
+    insights = call_sagemaker_model(joined_text)
+    print("📊 SageMaker Insights:", json.dumps(insights))
 
-        print("SageMaker response:", json.dumps(result, indent=2))
+    payload = {
+    "lines": text_lines,
+    "insights": insights["insights"]
+    }
 
-        return {
-            "statusCode": 200,
-            "body": json.dumps({
-                "classification": result
-            })
-        }
+    response = lambda_client.invoke(
+    FunctionName="SaveAndIndex",
+    InvocationType="Event",
+    Payload=json.dumps({ "body": json.dumps(payload) })
+    )
 
-    except Exception as e:
-        print("SageMaker invocation failed:", str(e))
-        return {
-            "statusCode": 500,
-            "body": json.dumps("Error invoking SageMaker")
-        }
+    print("📬 Invoked SaveAndIndex Lambda:", response['StatusCode'])
+
+    return {
+    'statusCode': 200,
+    'body': json.dumps({
+        'linesExtracted': len(text_lines),
+        'insights': insights
+    })
+    }

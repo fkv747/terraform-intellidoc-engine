@@ -58,3 +58,4 @@ resource "aws_iam_role_policy" "textract_permissions" {
     }]
   })
 }
+
