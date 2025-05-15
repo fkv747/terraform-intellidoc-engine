@@ -1,4 +1,4 @@
-const SEARCH_API_URL = "https://drjsvcgybd.execute-api.us-east-1.amazonaws.com/search"; // Replace if needed
+const SEARCH_API_URL = "https://ryb64vrz2l.execute-api.us-east-1.amazonaws.com/search"; // Replace if needed
 
 // Display selected file name
 document.getElementById("file-input").addEventListener("change", function () {
@@ -20,7 +20,7 @@ document.getElementById("upload-form").addEventListener("submit", async function
 
   try {
     // Step 1: Get presigned URL
-    const response = await fetch("https://drjsvcgybd.execute-api.us-east-1.amazonaws.com/generate-presigned-url", {
+    const response = await fetch("https://ryb64vrz2l.execute-api.us-east-1.amazonaws.com/generate-presigned-url", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ filename: file.name })
