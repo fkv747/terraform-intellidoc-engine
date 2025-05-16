@@ -34,16 +34,11 @@ def lambda_handler(event, context):
     message = json.loads(sns_record['Message'])
 
     job_id = message.get("JobId")
+    print(f"🔍 Fetching Textract results for JobId: {job_id}")
 
-    if job_id:
-        print(f"🔍 Fetching Textract results for JobId: {job_id}")
-        response = textract.get_document_text_detection(JobId=job_id)
-        blocks = response.get("Blocks", [])
-        text_lines = [block["Text"] for block in blocks if block["BlockType"] == "LINE"]
-    else:
-        print("🧪 No JobId provided — using mock extracted_text for testing")
-        text_lines = message.get("extracted_text", ["[No text provided]"])
-
+    response = textract.get_document_text_detection(JobId=job_id)
+    blocks = response.get("Blocks", [])
+    text_lines = [block["Text"] for block in blocks if block["BlockType"] == "LINE"]
 
     print(f"📝 Extracted {len(text_lines)} lines:")
     for line in text_lines:
