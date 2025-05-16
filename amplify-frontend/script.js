@@ -95,3 +95,14 @@ function displayResults(results) {
     container.appendChild(div);
   });
 }
+
+document.getElementById("clear-results-btn").addEventListener("click", () => {
+  // Clear search results
+  document.getElementById("search-results").innerHTML = "";
+
+  // Clear search input
+  document.getElementById("search-query").value = "";
+
+  // Optional: scroll back to top of result box
+  document.getElementById("search-results").scrollTop = 0;
+});
