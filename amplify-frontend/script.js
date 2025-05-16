@@ -85,7 +85,11 @@ function displayResults(results) {
     div.innerHTML = `
       <h3>${doc.category || "Unknown Category"}</h3>
       <p><strong>Confidence:</strong> ${doc.confidence}</p>
-      <p>${(doc.extracted_text || []).join("<br>")}</p>
+      <p>${
+        Array.isArray(doc.extracted_text)
+          ? doc.extracted_text.join("<br>")
+          : (doc.extracted_text || "")
+      }</p>
       <hr/>
     `;
     container.appendChild(div);
