@@ -1,3 +1,3 @@
-output "upload_api_url" {
-  value = module.api_gateway.upload_api_url
+output "api_gateway_url" {
+  value = module.api_gateway.invoke_url
 }

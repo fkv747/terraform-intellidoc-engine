@@ -12,8 +12,10 @@ resource "aws_iam_role" "lambda_role" {
   })
 }
 
-resource "aws_iam_policy" "opensearch_policy" {
-  name = "lambda_search_opensearch_policy"
+resource "aws_iam_role_policy" "opensearch_inline" {
+  name = "AllowOpenSearchFromLambda"
+  role = aws_iam_role.lambda_role.id
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -24,14 +26,14 @@ resource "aws_iam_policy" "opensearch_policy" {
           "es:ESHttpPost"
         ],
         Resource = "${var.opensearch_domain_arn}/*"
+      },
+      {
+        Effect = "Allow",
+        Action = "kms:Decrypt",
+        Resource = "*"
       }
     ]
   })
-}
-
-resource "aws_iam_role_policy_attachment" "attach_policy" {
-  role       = aws_iam_role.lambda_role.name
-  policy_arn = aws_iam_policy.opensearch_policy.arn
 }
 
 resource "aws_lambda_function" "search_opensearch" {
@@ -42,6 +44,7 @@ resource "aws_lambda_function" "search_opensearch" {
 
   filename         = "${path.module}/lambda_payload.zip"
   source_code_hash = filebase64sha256("${path.module}/lambda_payload.zip")
+  kms_key_arn = aws_kms_key.lambda_key.arn
 
   environment {
     variables = {
@@ -52,3 +55,48 @@ resource "aws_lambda_function" "search_opensearch" {
   }
 }
 
+resource "aws_kms_key" "lambda_key" {
+  description = "KMS key for SearchOpenSearch Lambda env vars"
+  enable_key_rotation = true
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement: [
+      {
+        Sid: "AllowLambdaDecrypt",
+        Effect: "Allow",
+        Principal: {
+          AWS = "arn:aws:iam::245994248859:role/lambda_search_opensearch_role"
+        },
+        Action: "kms:Decrypt",
+        Resource: "*"
+      },
+      {
+        Sid: "AllowAccountAdmin",
+        Effect: "Allow",
+        Principal: {
+          AWS = "arn:aws:iam::245994248859:root"
+        },
+        Action: "kms:*",
+        Resource: "*"
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "allow_all_opensearch" {
+  name = "AllowAllOpenSearchAccess"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = "es:*",
+        Resource = "*"
+      }
+    ]
+  })
+}

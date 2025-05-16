@@ -95,9 +95,13 @@ module "lambda_presign_upload" {
 }
 
 module "api_gateway" {
+  api_name = "IntelliDocAPI"
   source       = "./modules/api-gateway"
   lambda_arn   = module.lambda_presign_upload.lambda_presign_arn
   lambda_name  = "PresignUpload"
+  search_lambda_arn  = module.lambda_search_opensearch.lambda_function_arn
+  search_lambda_name = module.lambda_search_opensearch.lambda_function_name
+
 }
 
 module "lambda_search_opensearch" {

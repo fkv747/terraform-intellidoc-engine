@@ -7,30 +7,33 @@ from requests_aws4auth import AWS4Auth
 region = os.environ["REGION"]
 service = "es"
 credentials = boto3.Session().get_credentials()
-awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
+awsauth = AWS4Auth(
+    credentials.access_key,
+    credentials.secret_key,
+    region,
+    service,
+    session_token=credentials.token
+)
 
 opensearch_url = os.environ["OPENSEARCH_URL"]
 index_name = os.environ["OPENSEARCH_INDEX"]
 
 def lambda_handler(event, context):
-    query = event.get("queryStringParameters", {}).get("q", "")
     print("✅ SearchOpenSearch Lambda invoked")
+    query = event.get("queryStringParameters", {}).get("q", "")
     print("🔍 Query received:", query)
 
-    if not query:
-        return {
-            "statusCode": 400,
-            "headers": cors_headers(),
-            "body": json.dumps({"error": "Missing query parameter `q`"})
-        }
-
+    # TEMP: run match_all to verify indexing is working
     search_body = {
         "query": {
-            "multi_match": {
-                "query": query,
-                "fields": ["category", "extracted_text"]
-            }
-        }
+  "bool": {
+    "should": [
+      { "match_phrase": { "category": query } },
+      { "match_phrase": { "extracted_text": query } }
+    ],
+    "minimum_should_match": 1
+  }
+}
     }
 
     try:
@@ -42,9 +45,11 @@ def lambda_handler(event, context):
         )
 
         data = response.json()
+        print("📂 Raw OpenSearch response:")
+        print(json.dumps(data, indent=2))  # ✅ this will show in CloudWatch
+
         hits = data.get("hits", {}).get("hits", [])
         results = [hit["_source"] for hit in hits]
-        print("📤 Results returned:", json.dumps(results))
 
         return {
             "statusCode": 200,
@@ -53,6 +58,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
+        print("❌ ERROR:", str(e))
         return {
             "statusCode": 500,
             "headers": cors_headers(),
