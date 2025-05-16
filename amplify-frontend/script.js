@@ -83,7 +83,7 @@ function displayResults(results) {
     const div = document.createElement("div");
     div.className = "result-item";
     div.innerHTML = `
-      <h3>${doc.category || "Unknown Category"}</h3>
+      <h3>${doc.category && doc.category !== "Unknown" ? `<h3>${doc.category}</h3>` : ""}
       
       <p>${
         Array.isArray(doc.extracted_text)
