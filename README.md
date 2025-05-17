@@ -42,17 +42,17 @@ The frontend is hosted on **AWS Amplify** with a custom domain via **Route 53**.
 ## How It Works
 
 1. **User** uploads a file via the Amplify frontend  
-   ![S3 Upload](./screenshots/14-Pipeline-S3-Test.png)
+   ![S3 Upload](./screenshots/full-pipeline-test/14-Pipeline-S3-Test.png)
 2. File is stored in S3 and **TextractProcessor Lambda** is triggered  
-   ![Textract Log](./screenshots/14-Pipeline-CW-Textract-Test.png)
+   ![Textract Log](./screenshots/full-pipeline-test/14-Pipeline-CW-Textract-Test.png)
 3. Textract extracts raw text and **SNS** sends event to `MLAnalyzer`  
-   ![MLAnalyzer Log](./screenshots/14-Pipeline-CW-MLAnalyzer-Test.png)
+   ![MLAnalyzer Log](./screenshots/full-pipeline-test/14-Pipeline-CW-MLAnalyzer-Test.png)
 4. `MLAnalyzer` calls **SageMaker** endpoint (DistilBERT)  
    ![SageMaker Output](./screenshots/Lambda-Sagemaker-Test.png)
 5. `MLAnalyzer` invokes `SaveAndIndex` Lambda  
-   ![Save Index Log](./screenshots/14-Pipeline-CW-SaveAndIndex-Test.png)
+   ![Save Index Log](./screenshots/full-pipeline-test/14-Pipeline-CW-SaveAndIndex-Test.png)
 6. `SaveAndIndex` writes metadata to **DynamoDB**  
-   ![DynamoDB Entry](./screenshots/14-Pipeline-DynamoDB-Test.png)
+   ![DynamoDB Entry](./screenshots/full-pipeline-test/14-Pipeline-DynamoDB-Test.png)
 7. Extracted insights are indexed into **OpenSearch**  
    ![OpenSearch Final](./screenshots/13-OpenSearch-Deployed.png)
 
