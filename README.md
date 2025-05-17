@@ -48,13 +48,13 @@ The frontend is hosted on **AWS Amplify** with a custom domain via **Route 53**.
 3. Textract extracts raw text and **SNS** sends event to `MLAnalyzer`  
    ![MLAnalyzer Log](./screenshots/14-Pipeline-CW-MLAnalyzer-Test.png)
 4. `MLAnalyzer` calls **SageMaker** endpoint (DistilBERT)  
-   ![SageMaker Log](./screenshots/Lambda-Sagemaker-Test.png)
-5. `MLAnalyzer` invokes `SaveAndIndex`  
+   ![SageMaker Output](./screenshots/Lambda-Sagemaker-Test.png)
+5. `MLAnalyzer` invokes `SaveAndIndex` Lambda  
    ![Save Index Log](./screenshots/14-Pipeline-CW-SaveAndIndex-Test.png)
 6. `SaveAndIndex` writes metadata to **DynamoDB**  
-   ![DynamoDB](./screenshots/14-Pipeline-DynamoDB-Test.png)
+   ![DynamoDB Entry](./screenshots/14-Pipeline-DynamoDB-Test.png)
 7. Extracted insights are indexed into **OpenSearch**  
-   ![OpenSearch](./screenshots/OpenSearch.png)
+   ![OpenSearch Final](./screenshots/13-OpenSearch-Deployed.png)
 
 ---
 
@@ -66,15 +66,6 @@ cd terraform
 terraform init
 terraform apply
 ```
-
-You will deploy:
-- ✅ IAM roles & policies  
-- ✅ S3 Bucket w/ Textract trigger  
-- ✅ SNS Topic + Lambda Triggers  
-- ✅ SageMaker Endpoint (DistilBERT)  
-- ✅ DynamoDB + OpenSearch  
-- ✅ API Gateway  
-- ✅ Amplify frontend + Route 53 domain (via Console)
 
 ---
 
