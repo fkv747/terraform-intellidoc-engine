@@ -19,7 +19,7 @@ The frontend is hosted on **AWS Amplify** with a custom domain via **Route 53**.
 ## Demo
 
 **Watch the full demo on YouTube**  
-[Watch the YouTube demo](https://www.youtube.com/watch?v=REPLACE_WITH_YOUR_LINK)
+[Watch the YouTube demo](https://youtu.be/rgM3xRBsn7s)
 
 ---
 
