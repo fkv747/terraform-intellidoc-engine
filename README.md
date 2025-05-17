@@ -1,13 +1,13 @@
 # IntelliDoc Engine — Serverless Document Processor with Textract, SageMaker, and OpenSearch on AWS
 
-![IaC](https://img.shields.io/badge/IaC-Terraform-7B42BC?style=for-the-badge&logo=terraform)  
-![Cloud](https://img.shields.io/badge/Cloud-AWS-232F3E?style=for-the-badge&logo=amazonaws)  
-![Textract](https://img.shields.io/badge/Amazon%20Textract-Document%20Text-FF9900?style=for-the-badge&logo=amazonaws)  
-![SageMaker](https://img.shields.io/badge/SageMaker-Real--Time%20Inference-1A6FFF?style=for-the-badge&logo=amazonaws)  
-![OpenSearch](https://img.shields.io/badge/OpenSearch-Search%20Results-005EB8?style=for-the-badge&logo=opensearch)  
-![AWS Lambda](https://img.shields.io/badge/Lambda-Serverless-F58536?style=for-the-badge&logo=awslambda)  
-![SNS](https://img.shields.io/badge/SNS-Event%20Trigger-DD3464?style=for-the-badge&logo=amazonaws)  
-![DynamoDB](https://img.shields.io/badge/DynamoDB-Storage-4053D6?style=for-the-badge&logo=amazonaws)  
+![IaC](https://img.shields.io/badge/IaC-TERRAFORM-7B42BC?style=for-the-badge&logo=terraform)
+![Cloud](https://img.shields.io/badge/CLOUD-AWS-232F3E?style=for-the-badge&logo=amazonaws)
+![AWS Lambda](https://img.shields.io/badge/AWS%20Lambda-SERVERLESS-F58536?style=for-the-badge&logo=awslambda)
+![Amazon Textract](https://img.shields.io/badge/Amazon%20Textract-DOCUMENT%20TEXT-FF9900?style=for-the-badge&logo=amazonaws)
+![Amazon SageMaker](https://img.shields.io/badge/SageMaker-REAL--TIME%20INFERENCE-1A6FFF?style=for-the-badge&logo=amazonaws)
+![OpenSearch](https://img.shields.io/badge/OpenSearch-SEARCH%20RESULTS-005EB8?style=for-the-badge&logo=opensearch)
+![SNS](https://img.shields.io/badge/SNS-EVENT%20TRIGGER-DD3464?style=for-the-badge&logo=amazonaws)
+![DynamoDB](https://img.shields.io/badge/DynamoDB-STORAGE-4053D6?style=for-the-badge&logo=amazonaws)
 ![API Gateway](https://img.shields.io/badge/API%20Gateway-HTTP%20API-4B5563?style=for-the-badge&logo=amazonaws)
 
 This is a fully serverless document analysis pipeline built on AWS. Users can upload any document (PDF, DOCX, TXT, etc.) via a frontend web app. The pipeline extracts text using **Amazon Textract**, analyzes it in real-time using **SageMaker (DistilBERT)**, and stores the results in **DynamoDB** and **OpenSearch** for instant search and filtering.
